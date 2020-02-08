@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>UTM test</title>
+    <script src="/utm.js"></script>
+</head>
+<body>
+    <script>
+        var __originalOnload = window.onload;
+        window.onload = function (ev) {
+            UTM.init();
+            __originalOnload(ev)
+        };
+    </script>
+    <h1
+        data-for-utm="${tel} ${undefined_variable:default substitution}"
+        data-for-google="From google with love"
+        data-for-yandex="In soviet russia yandex search you"
+    >Default Title</h1>
+</body>
+</html>
