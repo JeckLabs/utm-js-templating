@@ -2,14 +2,17 @@
 <html lang="en">
 <head>
     <title>UTM test</title>
-    <script src="https://raw.githubusercontent.com/JeckLabs/utm-js-templating/master/utm.js"></script>
+    <meta charset="UTF-8"/>
+    <script src="https://cdn.jsdelivr.net/gh/JeckLabs/utm-js-templating/utm.js"></script>
 </head>
 <body>
     <script>
         var __originalOnload = window.onload;
         window.onload = function (ev) {
             UTM.init();
-            __originalOnload(ev)
+            if (__originalOnload) {
+                __originalOnload(ev)
+            }
         };
     </script>
     <h1

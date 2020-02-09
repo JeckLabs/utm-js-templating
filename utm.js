@@ -1,11 +1,18 @@
 var UTM = {
     getUTMVars: function () {
+        var storageVars = localStorage.getItem('utm_template_vars');
+        if (storageVars !== null) {
+            return JSON.parse(storageVars)
+        }
+        if (localStorage.getItem('utm_returned_user')) {
+            return {}
+        }
         var parser = document.createElement('a');
         parser.href = document.location;
 
         var queries = parser.search.replace(/^\?/, '').split('&');
         var split, key, value;
-        var params = {};
+        storageVars = {};
         for(var i = 0; i < queries.length; i++ ) {
             split = queries[i].split('=', 2);
             key = split[0];
@@ -14,10 +21,13 @@ var UTM = {
                 continue
             }
             key = key.replace(/^utm_/i, '').toLowerCase();
-            params[key] = value;
+            storageVars[key] = value;
         }
-
-        return params
+        if (Object.keys(storageVars).length > 0) {
+            localStorage.setItem('utm_returned_user', '1');
+            localStorage.setItem('utm_template_vars', JSON.stringify(storageVars));
+        }
+        return storageVars
     },
     renderTemplate: function (template, vars) {
         return template.replace(/\${(.*?)}/gi, function (match, contents) {
@@ -34,8 +44,8 @@ var UTM = {
         var templateVars = this.getUTMVars();
 
         var referrersMap = [
-            [/^https?:\/\/(www\.)?google\.\w+(?:\/|$)/im, 'data-for-google'],
-            [/^https?:\/\/(www\.)?yandex\.\w+(?:\/|$)/im, 'data-for-yandex']
+            [/^https?:\/\/(www\.)?google\.\w+(?:\/|$)/im, 'data-for-google', 'utm_from_google'],
+            [/^https?:\/\/(www\.)?yandex\.\w+(?:\/|$)/im, 'data-for-yandex', 'utm_from_yandex']
         ];
 
         var elements;
@@ -48,18 +58,20 @@ var UTM = {
             return
         }
 
-        var regexp, attrName;
+        var regexp, attrName, localStorageKey;
+        var returnedUser = localStorage.getItem('utm_returned_user');
         referrersMap.forEach(function (pair) {
             regexp = pair[0];
-            console.log(regexp, document.referrer, document.referrer.match(regexp));
-            if (!document.referrer.match(regexp)) {
-                return
-            }
             attrName = pair[1];
-            elements = document.querySelectorAll('*[' + attrName + ']');
-            elements.forEach(function (e) {
-                e.textContent = e.getAttribute(attrName);
-            });
+            localStorageKey = pair[2];
+            if (localStorage.getItem(localStorageKey) || (!returnedUser && document.referrer.match(regexp))) {
+                localStorage.setItem('utm_returned_user', '1');
+                localStorage.setItem(localStorageKey, '1');
+                elements = document.querySelectorAll('*[' + attrName + ']');
+                elements.forEach(function (e) {
+                    e.textContent = e.getAttribute(attrName);
+                });
+            }
         })
     }
 };
