@@ -21,7 +21,7 @@ var UTM = {
                 continue
             }
             key = key.replace(/^utm_/i, '').toLowerCase();
-            storageVars[key] = value;
+            storageVars[key] = decodeURIComponent(value);
         }
         if (Object.keys(storageVars).length > 0) {
             localStorage.setItem('utm_returned_user', '1');
